@@ -1,140 +1,80 @@
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Image } from 'react-native';
-import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import React from "react";
+import { Text, View, TouchableOpacity, ScrollView } from "react-native";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  FontAwesome5,
+} from "@expo/vector-icons";
 
-export default function App() {
+const App = () => {
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-gradient-to-b from-lime-400 to-green-600 px-5 py-8 justify-between">
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>iGROW</Text>
+      <View className="flex-row justify-between items-center pt-10 pb-5">
+        <Text className="text-4xl font-bold text-green-600">iGROW</Text>
         <Ionicons name="leaf" size={40} color="#4CAF50" />
       </View>
 
       {/* Status Overview */}
-      <ScrollView contentContainerStyle={styles.statusContainer}>
-        <View style={styles.statusCard}>
-          <MaterialCommunityIcons name="temperature-celsius" size={30} color="#FF5722" />
-          <Text style={styles.statusText}>Temperature</Text>
-          <Text style={styles.statusValue}>24°C</Text>
+      <ScrollView
+        contentContainerStyle={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          justifyContent: "space-around",
+        }}
+      >
+        <View className="w-[45%] bg-white p-5 rounded-lg items-center my-2 shadow-md">
+          <MaterialCommunityIcons
+            name="temperature-celsius"
+            size={30}
+            color="#FF5722"
+          />
+          <Text className="text-lg text-gray-600 mt-2">Temperature</Text>
+          <Text className="text-xl font-bold text-green-600 mt-1">24°C</Text>
         </View>
-        <View style={styles.statusCard}>
+
+        <View className="w-[45%] bg-white p-5 rounded-lg items-center my-2 shadow-md">
           <Ionicons name="water" size={30} color="#2196F3" />
-          <Text style={styles.statusText}>Humidity</Text>
-          <Text style={styles.statusValue}>60%</Text>
+          <Text className="text-lg text-gray-600 mt-2">Humidity</Text>
+          <Text className="text-xl font-bold text-green-600 mt-1">60%</Text>
         </View>
-        <View style={styles.statusCard}>
+
+        <View className="w-[45%] bg-white p-5 rounded-lg items-center my-2 shadow-md">
           <FontAwesome5 name="seedling" size={30} color="#8BC34A" />
-          <Text style={styles.statusText}>Soil Moisture</Text>
-          <Text style={styles.statusValue}>80%</Text>
+          <Text className="text-lg text-gray-600 mt-2">Soil Moisture</Text>
+          <Text className="text-xl font-bold text-green-600 mt-1">80%</Text>
         </View>
-        <View style={styles.statusCard}>
-          <MaterialCommunityIcons name="weather-sunny" size={30} color="#FFC107" />
-          <Text style={styles.statusText}>Light Intensity</Text>
-          <Text style={styles.statusValue}>High</Text>
+
+        <View className="w-[45%] bg-white p-5 rounded-lg items-center my-2 shadow-md">
+          <MaterialCommunityIcons
+            name="weather-sunny"
+            size={30}
+            color="#FFC107"
+          />
+          <Text className="text-lg text-gray-600 mt-2">Light Intensity</Text>
+          <Text className="text-xl font-bold text-green-600 mt-1">High</Text>
         </View>
       </ScrollView>
 
       {/* Control Buttons */}
-      <View style={styles.controls}>
-        <TouchableOpacity style={styles.controlButton}>
+      <View className="flex-row justify-around my-5">
+        <TouchableOpacity className="w-[30%] bg-white p-4 rounded-lg items-center shadow-md">
           <Ionicons name="bulb" size={30} color="#FFEB3B" />
-          <Text style={styles.controlButtonText}>Lights</Text>
+          <Text className="text-lg text-gray-600 mt-2">Lights</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.controlButton}>
+
+        <TouchableOpacity className="w-[30%] bg-white p-4 rounded-lg items-center shadow-md">
           <Ionicons name="water-outline" size={30} color="#2196F3" />
-          <Text style={styles.controlButtonText}>Water</Text>
+          <Text className="text-lg text-gray-600 mt-2">Water</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.controlButton}>
+
+        <TouchableOpacity className="w-[30%] bg-white p-4 rounded-lg items-center shadow-md">
           <MaterialCommunityIcons name="fan" size={30} color="#00BCD4" />
-          <Text style={styles.controlButtonText}>Fan</Text>
+          <Text className="text-lg text-gray-600 mt-2">Fan</Text>
         </TouchableOpacity>
       </View>
-
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 20,
-  },
-  header: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 40,
-    paddingBottom: 20,
-  },
-  headerText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#4CAF50',
-  },
-  statusContainer: {
-    width: '100%',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-  },
-  statusCard: {
-    width: '45%',
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginVertical: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
-  },
-  statusText: {
-    fontSize: 16,
-    color: '#757575',
-    marginTop: 10,
-  },
-  statusValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4CAF50',
-    marginTop: 5,
-  },
-  controls: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    marginVertical: 20,
-  },
-  controlButton: {
-    width: '30%',
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
-  },
-  controlButtonText: {
-    fontSize: 16,
-    color: '#757575',
-    marginTop: 10,
-  },
-  footer: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-  },
-});
+export default App;

@@ -38,10 +38,10 @@ const SignUp = () => {
   };
 
   return (
-    <SafeAreaView className="bg-primary h-full">
+    <SafeAreaView className="bg-gradient-to-b from-lime-400 to-green-600 h-full">
       <ScrollView>
         <View
-          className="w-full flex justify-center h-full px-4 my-6"
+          className="w-full flex justify-center items-center h-full px-4 my-10"
           style={{
             minHeight: Dimensions.get("window").height - 100,
           }}
@@ -49,11 +49,11 @@ const SignUp = () => {
           <Image
             source={images.logo}
             resizeMode="contain"
-            className="w-[115px] h-[34px]"
+            className="w-[115px] h-[64px] "
           />
 
-          <Text className="text-2xl font-semibold text-white mt-10 font-psemibold">
-            Sign Up to Aora
+          <Text className="text-2xl font-semibold text-primary mt-10 font-psemibold">
+            Sign Up to iGROW
           </Text>
 
           <FormField
@@ -81,19 +81,15 @@ const SignUp = () => {
           <CustomButton
             title="Sign Up"
             handlePress={submit}
-            containerStyles="mt-7"
+            containerStyles="w-full mt-7 bg-emerald-700 rounded-full py-4 shadow-lg"
+            textStyles="text-white text-lg font-semibold"
             isLoading={isSubmitting}
           />
 
-          <View className="flex justify-center pt-5 flex-row gap-2">
-            <Text className="text-lg text-gray-100 font-pregular">
-              Have an account already?
-            </Text>
-            <Link
-              href="/sign-in"
-              className="text-lg font-psemibold text-secondary"
-            >
-              Login
+          <View className="flex justify-center pt-5 flex-row gap-2 mb-10">
+            <Text className="text-lg text-primary-200">Have an account?</Text>
+            <Link href="/sign-in" className="text-lg font-bold text-green-300">
+              Signin
             </Link>
           </View>
         </View>
