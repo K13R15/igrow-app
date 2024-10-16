@@ -1,4 +1,4 @@
-import { Text, View, ScrollView } from "react-native";
+import { Text, View, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -32,28 +32,21 @@ const notifications = [
 
 const Notification = () => {
   return (
-    <SafeAreaView className="px-4 py-6 bg-gradient-to-b from-lime-400 to-green-600 h-full">
-      <Text className="text-3xl font-bold text-primary mb-6">
-        Notifications
-      </Text>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.header}>Notifications</Text>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {notifications.map((notification) => (
-          <View
-            key={notification.id}
-            className="flex-row items-center bg-white rounded-lg p-4 mb-4 shadow-lg"
-          >
+          <View key={notification.id} style={styles.notificationItem}>
             <MaterialCommunityIcons
               name={notification.icon}
               size={28}
               color="#34D399" // Soft green color for the icons
-              className="mr-4"
+              style={styles.icon}
             />
-            <View className="flex-1">
-              <Text className="text-lg font-semibold text-gray-800">
-                {notification.message}
-              </Text>
-              <Text className="text-sm text-gray-500">{notification.time}</Text>
+            <View style={styles.notificationDetails}>
+              <Text style={styles.message}>{notification.message}</Text>
+              <Text style={styles.time}>{notification.time}</Text>
             </View>
           </View>
         ))}
@@ -61,5 +54,48 @@ const Notification = () => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    backgroundColor: "linear-gradient(180deg, limegreen 0%, green 100%)",
+    flex: 1,
+  },
+  header: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#1F2937", // Dark text color
+    marginBottom: 24,
+  },
+  notificationItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  icon: {
+    marginRight: 16,
+  },
+  notificationDetails: {
+    flex: 1,
+  },
+  message: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#374151", // Darker gray for text
+  },
+  time: {
+    fontSize: 14,
+    color: "#6B7280", // Lighter gray for time
+  },
+});
 
 export default Notification;

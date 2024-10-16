@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Image, TouchableOpacity } from "react-native";
+import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
 
 import { icons } from "../../constants";
 import { signOut } from "../../lib/appwrite";
@@ -19,37 +19,81 @@ const Profile = () => {
   };
 
   return (
-    <SafeAreaView className="bg-gradient-to-b from-lime-400 to-green-600  h-full">
-      <View className="w-full flex justify-center items-center mt-6 mb-12 px-4">
-        <TouchableOpacity
-          onPress={logout}
-          className="flex w-full items-end mb-10"
-        >
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <TouchableOpacity onPress={logout} style={styles.logoutButton}>
           <Image
             source={icons.logout}
             resizeMode="contain"
-            className="w-6 h-6"
+            style={styles.logoutIcon}
           />
         </TouchableOpacity>
 
-        <View className="w-16 h-16 border border-secondary rounded-lg flex justify-center items-center">
+        <View style={styles.avatarContainer}>
           <Image
             source={{ uri: user?.avatar }}
-            className="w-[90%] h-[90%] rounded-lg"
+            style={styles.avatar}
             resizeMode="cover"
           />
         </View>
 
         <InfoBox
           title={user?.username}
-          containerStyles="mt-5"
-          titleStyles="text-lg text-primary"
+          containerStyles={{ marginTop: 20 }}
+          titleStyles={styles.username}
         />
 
-        <View className="mt-5 flex flex-row"></View>
+        <View style={styles.extraContainer}></View>
       </View>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "linear-gradient(180deg, limegreen 0%, green 100%)",
+    flex: 1,
+  },
+  content: {
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 24,
+    marginBottom: 48,
+    paddingHorizontal: 16,
+  },
+  logoutButton: {
+    width: "100%",
+    alignItems: "flex-end",
+    marginBottom: 40,
+  },
+  logoutIcon: {
+    width: 24,
+    height: 24,
+  },
+  avatarContainer: {
+    width: 64,
+    height: 64,
+    borderWidth: 2,
+    borderColor: "#34D399", // Light green for border
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatar: {
+    width: "90%",
+    height: "90%",
+    borderRadius: 12,
+  },
+  username: {
+    fontSize: 18,
+    color: "#1F2937", // Dark text color
+    fontWeight: "600",
+  },
+  extraContainer: {
+    marginTop: 20,
+    flexDirection: "row",
+  },
+});
 
 export default Profile;

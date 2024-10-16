@@ -1,5 +1,12 @@
-import React from "react";
-import { Text, View, TouchableOpacity, ScrollView } from "react-native";
+import React, { useState } from "react";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Dimensions,
+} from "react-native";
 import {
   Ionicons,
   MaterialCommunityIcons,
@@ -7,74 +14,183 @@ import {
 } from "@expo/vector-icons";
 
 const App = () => {
+  const [lightsOn, setLightsOn] = useState(false);
+  const [waterOn, setWaterOn] = useState(false);
+  const [fanOn, setFanOn] = useState(false);
+
+  const handleLightsToggle = () => setLightsOn(!lightsOn);
+  const handleWaterToggle = () => setWaterOn(!waterOn);
+  const handleFanToggle = () => setFanOn(!fanOn);
+
   return (
-    <View className="flex-1 bg-gradient-to-b from-lime-400 to-green-600 px-5 py-8 justify-between">
+    <View style={styles.container}>
       {/* Header */}
-      <View className="flex-row justify-between items-center pt-10 pb-5">
-        <Text className="text-4xl font-bold text-green-600">iGROW</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>iGROW</Text>
         <Ionicons name="leaf" size={40} color="#4CAF50" />
       </View>
 
       {/* Status Overview */}
-      <ScrollView
-        contentContainerStyle={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          justifyContent: "space-around",
-        }}
-      >
-        <View className="w-[45%] bg-white p-5 rounded-lg items-center my-2 shadow-md">
+      <ScrollView contentContainerStyle={styles.scrollView}>
+        <View style={styles.statusCard}>
           <MaterialCommunityIcons
             name="temperature-celsius"
             size={30}
             color="#FF5722"
           />
-          <Text className="text-lg text-gray-600 mt-2">Temperature</Text>
-          <Text className="text-xl font-bold text-green-600 mt-1">24°C</Text>
+          <Text style={styles.statusLabel}>Temperature</Text>
+          <Text style={styles.statusValue}>24°C</Text>
         </View>
 
-        <View className="w-[45%] bg-white p-5 rounded-lg items-center my-2 shadow-md">
+        <View style={styles.statusCard}>
           <Ionicons name="water" size={30} color="#2196F3" />
-          <Text className="text-lg text-gray-600 mt-2">Humidity</Text>
-          <Text className="text-xl font-bold text-green-600 mt-1">60%</Text>
+          <Text style={styles.statusLabel}>Humidity</Text>
+          <Text style={styles.statusValue}>60%</Text>
         </View>
 
-        <View className="w-[45%] bg-white p-5 rounded-lg items-center my-2 shadow-md">
+        <View style={styles.statusCard}>
           <FontAwesome5 name="seedling" size={30} color="#8BC34A" />
-          <Text className="text-lg text-gray-600 mt-2">Soil Moisture</Text>
-          <Text className="text-xl font-bold text-green-600 mt-1">80%</Text>
+          <Text style={styles.statusLabel}>Soil Moisture</Text>
+          <Text style={styles.statusValue}>80%</Text>
         </View>
 
-        <View className="w-[45%] bg-white p-5 rounded-lg items-center my-2 shadow-md">
+        <View style={styles.statusCard}>
           <MaterialCommunityIcons
             name="weather-sunny"
             size={30}
             color="#FFC107"
           />
-          <Text className="text-lg text-gray-600 mt-2">Light Intensity</Text>
-          <Text className="text-xl font-bold text-green-600 mt-1">High</Text>
+          <Text style={styles.statusLabel}>Light Intensity</Text>
+          <Text style={styles.statusValue}>High</Text>
         </View>
       </ScrollView>
 
       {/* Control Buttons */}
-      <View className="flex-row justify-around my-5">
-        <TouchableOpacity className="w-[30%] bg-white p-4 rounded-lg items-center shadow-md">
-          <Ionicons name="bulb" size={30} color="#FFEB3B" />
-          <Text className="text-lg text-gray-600 mt-2">Lights</Text>
+      <View style={styles.controlContainer}>
+        <TouchableOpacity
+          style={[
+            styles.controlButton,
+            lightsOn && { backgroundColor: "#FFEB3B" }, // Yellow background if lights are on
+          ]}
+          onPress={handleLightsToggle}
+        >
+          <Ionicons
+            name="bulb"
+            size={30}
+            color={lightsOn ? "#FFF" : "#FFEB3B"}
+          />
+          <Text style={styles.controlLabel}>
+            Lights {lightsOn ? "On" : "Off"}
+          </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="w-[30%] bg-white p-4 rounded-lg items-center shadow-md">
-          <Ionicons name="water-outline" size={30} color="#2196F3" />
-          <Text className="text-lg text-gray-600 mt-2">Water</Text>
+        <TouchableOpacity
+          style={[
+            styles.controlButton,
+            waterOn && { backgroundColor: "#2196F3" }, // Blue background if water is on
+          ]}
+          onPress={handleWaterToggle}
+        >
+          <Ionicons
+            name="water-outline"
+            size={30}
+            color={waterOn ? "#FFF" : "#2196F3"}
+          />
+          <Text style={styles.controlLabel}>
+            Water {waterOn ? "On" : "Off"}
+          </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="w-[30%] bg-white p-4 rounded-lg items-center shadow-md">
-          <MaterialCommunityIcons name="fan" size={30} color="#00BCD4" />
-          <Text className="text-lg text-gray-600 mt-2">Fan</Text>
+        <TouchableOpacity
+          style={[
+            styles.controlButton,
+            fanOn && { backgroundColor: "#00BCD4" }, // Cyan background if fan is on
+          ]}
+          onPress={handleFanToggle}
+        >
+          <MaterialCommunityIcons
+            name="fan"
+            size={30}
+            color={fanOn ? "#FFF" : "#00BCD4"}
+          />
+          <Text style={styles.controlLabel}>Fan {fanOn ? "On" : "Off"}</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "linear-gradient(180deg, #A3E635 0%, #059669 100%)", // Lime to green gradient
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    justifyContent: "space-between",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 40,
+    paddingBottom: 20,
+  },
+  headerText: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#065F46", // Dark green text
+  },
+  scrollView: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
+  },
+  statusCard: {
+    width: Dimensions.get("window").width * 0.45,
+    backgroundColor: "#FFF",
+    padding: 20,
+    borderRadius: 16,
+    alignItems: "center",
+    marginVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5, // For Android shadow
+  },
+  statusLabel: {
+    fontSize: 18,
+    color: "#6B7280", // Muted gray
+    marginTop: 8,
+  },
+  statusValue: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#065F46", // Green text
+    marginTop: 4,
+  },
+  controlContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginVertical: 20,
+  },
+  controlButton: {
+    width: "30%",
+    backgroundColor: "#FFF",
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  controlLabel: {
+    fontSize: 18,
+    color: "#6B7280", // Muted gray
+    marginTop: 8,
+  },
+});
 
 export default App;
