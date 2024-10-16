@@ -11,6 +11,9 @@ import logout from "../assets/icons/logout.png";
 import eyeHide from "../assets/icons/eye-hide.png";
 import eye from "../assets/icons/eye.png";
 import play from "../assets/icons/play.png";
+import setting from "../assets/icons/settings.png";
+import notification from "../assets/icons/notification.png";
+import history from "../assets/icons/history.png";
 
 export default {
   play,
@@ -26,4 +29,7 @@ export default {
   logout,
   eyeHide,
   eye,
+  setting,
+  notification,
+  history,
 };
