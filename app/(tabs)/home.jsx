@@ -16,21 +16,20 @@ import {
 const App = () => {
   const [lightsOn, setLightsOn] = useState(false);
   const [waterOn, setWaterOn] = useState(false);
-  const [fanOn, setFanOn] = useState(false);
 
   const handleLightsToggle = () => setLightsOn(!lightsOn);
   const handleWaterToggle = () => setWaterOn(!waterOn);
-  const handleFanToggle = () => setFanOn(!fanOn);
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>iGROW</Text>
+        <Text style={styles.headerText}>iGROW Dashboard</Text>
         <Ionicons name="leaf" size={40} color="#4CAF50" />
       </View>
 
-      {/* Status Overview */}
+      {/* Status Overview Dashboard */}
+      <Text style={styles.dashboardTitle}>Environment Overview</Text>
       <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={styles.statusCard}>
           <MaterialCommunityIcons
@@ -101,19 +100,9 @@ const App = () => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.controlButton,
-            fanOn && { backgroundColor: "#00BCD4" }, // Cyan background if fan is on
-          ]}
-          onPress={handleFanToggle}
-        >
-          <MaterialCommunityIcons
-            name="fan"
-            size={30}
-            color={fanOn ? "#FFF" : "#00BCD4"}
-          />
-          <Text style={styles.controlLabel}>Fan {fanOn ? "On" : "Off"}</Text>
+        {/* New Settings Button */}
+        <TouchableOpacity style={styles.settingsButton}>
+          <Ionicons name="settings-outline" size={24} color="#6B7280" />
         </TouchableOpacity>
       </View>
     </View>
@@ -139,6 +128,13 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     color: "#065F46", // Dark green text
+  },
+  dashboardTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#065F46",
+    textAlign: "center",
   },
   scrollView: {
     flexDirection: "row",
@@ -178,6 +174,18 @@ const styles = StyleSheet.create({
     width: "30%",
     backgroundColor: "#FFF",
     paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  settingsButton: {
+    backgroundColor: "#FFF",
+    paddingVertical: 16,
+    paddingHorizontal: 12,
     borderRadius: 16,
     alignItems: "center",
     shadowColor: "#000",
