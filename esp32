@@ -1,0 +1,206 @@
+#include <Arduino.h>
+#include <ArduinoJson.h>
+#include <ArduinoJson.hpp>
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <Adafruit_Sensor.h>
+#include "DHT.h"
+#include <LiquidCrystal_I2C.h>
+
+#define DHTPIN 26       // Digital pin connected to the DHT sensor
+#define DHTTYPE DHT11   // DHT 11
+#define AOUT_PIN 36     // ESP32 pin GPIO36 (ADC0) that connects to AOUT pin of moisture sensor
+#define THRESHOLD 20    // Soil Moisture treshold in percentage 
+                        //(according to google, most plants require at least 21-80% soil moisture)
+#define relay 15         // relay module GPIO15
+
+//Initialize the LCD display
+// set the LCD number of columns and rows
+int lcdColumns = 16;
+int lcdRows = 2;
+LiquidCrystal_I2C lcd(0x27, lcdColumns, lcdRows);
+
+// Wifi credentials
+const char* ssid = "raspi-hotspot";     // raspberry pi's hotspot ssid
+const char* password = "raspi1234";  
+const char* mqtt_server = "10.42.0.1";  // raspberry pi's local ip
+
+int lcdInfoDelay = 3500;
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+// Initialize DHT sensor.
+// Note that older versions of this library took an optional third parameter to
+// tweak the timings for faster processors.  This parameter is no longer needed
+// as the current DHT reading algorithm adjusts itself to work on faster procs.
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  delay(100);
+  Serial.begin(115200);
+
+  analogSetAttenuation(ADC_11db);
+
+  dht.begin();
+
+  lcd.init();
+  lcd.backlight();
+  pinMode(relay, OUTPUT);
+  digitalWrite(relay, HIGH);
+
+  // lcd.setCursor(0, 0);
+  // lcd.print("System Loading");
+  // for (int a = 0; a <= 15; a++) {
+  //   lcd.setCursor(a, 1);
+  //   lcd.print(".");
+  //   delay(200);
+  // }
+  // lcd.clear();
+
+  // We start by connecting to a WiFi network
+  Serial.println();
+  Serial.print("Connecting ");
+  Serial.println(ssid);
+
+  scrollText(0, "Connecting to " + String(ssid), 150, lcdColumns);
+
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+    // lcd.print(".");
+  }
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("WiFi connected");
+  lcd.setCursor(0, 1);
+  lcd.print(WiFi.localIP());
+
+  client.setServer(mqtt_server, 1883);
+
+  delay(2000);
+  lcd.clear();
+}
+
+void loop() {
+  if (!client.connected()) {
+    reconnect();
+  }
+
+  // long now = millis();
+  // if (now - lastMsg > 5000) {
+  // lastMsg = now;
+  float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
+
+  lcd.setCursor(0, 0);
+  lcd.print("Humid: ");
+  lcd.print(humidity);
+  lcd.print("%");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Temp: ");
+  lcd.print(temperature);
+
+  int moisture = analogRead(AOUT_PIN);  // read the analog value from sensor
+  moisture = map(moisture, 0, 4095, 0, 100);
+  moisture = (moisture - 100) * -1;
+
+  delay(lcdInfoDelay);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Moisture: ");
+  lcd.print(moisture);
+  lcd.print("%");
+
+  lcd.setCursor(0, 1);
+  if (moisture < THRESHOLD) {
+    Serial.print("The soil is DRY (");
+    digitalWrite(relay, LOW);
+    lcd.print("Motor is ON");
+  } else {
+    Serial.print("The soil is WET (");
+    digitalWrite(relay, HIGH);
+    lcd.print("Motor is OFF");
+  }
+  
+  Serial.print(moisture);
+  Serial.print("%");
+  Serial.println(")");
+
+  int uv = 0;
+  // lcd.setCursor(0, 1);
+  // lcd.print("UV: ");
+  // lcd.print(uv);
+
+  StaticJsonDocument<80> doc;
+
+  doc["t"] = temperature;
+  doc["h"] = humidity;
+  doc["m"] = moisture;
+  doc["u"] = uv;
+
+  char output[80];
+  serializeJson(doc, output);
+  Serial.println("sending sensor data to MQTT server (" + String(mqtt_server) + ")");
+  Serial.println(output);
+  client.publish("/home/sensors", output);
+  // }
+
+  delay(1000);
+}
+
+void reconnect() {
+  // Loop until we're reconnected
+  while (!client.connected()) {
+    Serial.print("Connecting to MQTT server (" + String(mqtt_server) + ") ...");
+
+    lcd.init();
+    lcd.backlight();
+    scrollText(0, "Connecting to MQTT server (" + String(mqtt_server) + ")", 120, lcdColumns);
+
+    // Create a random client ID
+    String clientId = "ESP32Client-";
+    clientId += String(random(0xffff), HEX);
+    // Attempt to connect
+    if (client.connect(clientId.c_str())) {
+      Serial.println("connected");
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("connected");
+    } else {
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("failed");
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+    }
+    delay(2500);
+  }
+}
+
+// Function to scroll text
+// The function acepts the following arguments:
+// row: row number where the text will be displayed
+// message: message to scroll
+// delayTime: delay between each character shifting
+// lcdColumns: number of columns
+void scrollText(int row, String message, int delayTime, int lcdColumns) {
+  for (int i = 0; i < lcdColumns; i++) {
+    message = " " + message;
+  }
+  message = message + " ";
+  for (int pos = 0; pos < message.length(); pos++) {
+    lcd.setCursor(0, row);
+    lcd.print(message.substring(pos, pos + lcdColumns));
+    delay(delayTime);
+  }
+}
