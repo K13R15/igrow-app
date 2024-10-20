@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import {
   Text,
@@ -13,64 +14,72 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 
-const App = () => {
+const HomeScreen = () => {
+  const navigation = useNavigation();
+  console.log(navigation);
   const [lightsOn, setLightsOn] = useState(false);
   const [waterOn, setWaterOn] = useState(false);
-  const [fanOn, setFanOn] = useState(false);
 
   const handleLightsToggle = () => setLightsOn(!lightsOn);
   const handleWaterToggle = () => setWaterOn(!waterOn);
-  const handleFanToggle = () => setFanOn(!fanOn);
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>iGROW</Text>
+        <Text style={styles.headerText}>iGROW Dashboard</Text>
         <Ionicons name="leaf" size={40} color="#4CAF50" />
       </View>
 
-      {/* Status Overview */}
+      <Text style={styles.dashboardTitle}>Environment Overview</Text>
       <ScrollView contentContainerStyle={styles.scrollView}>
-        <View style={styles.statusCard}>
-          <MaterialCommunityIcons
-            name="temperature-celsius"
-            size={30}
-            color="#FF5722"
-          />
-          <Text style={styles.statusLabel}>Temperature</Text>
-          <Text style={styles.statusValue}>24°C</Text>
-        </View>
+        <TouchableOpacity onPress={() => navigation.navigate("Temperature")}>
+          <View style={styles.statusCard}>
+            <MaterialCommunityIcons
+              name="temperature-celsius"
+              size={30}
+              color="#FF5722"
+            />
+            <Text style={styles.statusLabel}>Temperature</Text>
+            <Text style={styles.statusValue}>24°C</Text>
+          </View>
+        </TouchableOpacity>
 
-        <View style={styles.statusCard}>
-          <Ionicons name="water" size={30} color="#2196F3" />
-          <Text style={styles.statusLabel}>Humidity</Text>
-          <Text style={styles.statusValue}>60%</Text>
-        </View>
+        <TouchableOpacity onPress={() => navigation.navigate("Humidity")}>
+          <View style={styles.statusCard}>
+            <Ionicons name="water" size={30} color="#2196F3" />
+            <Text style={styles.statusLabel}>Humidity</Text>
+            <Text style={styles.statusValue}>60%</Text>
+          </View>
+        </TouchableOpacity>
 
-        <View style={styles.statusCard}>
-          <FontAwesome5 name="seedling" size={30} color="#8BC34A" />
-          <Text style={styles.statusLabel}>Soil Moisture</Text>
-          <Text style={styles.statusValue}>80%</Text>
-        </View>
+        <TouchableOpacity onPress={() => navigation.navigate("Soil Moisture")}>
+          <View style={styles.statusCard}>
+            <FontAwesome5 name="seedling" size={30} color="#8BC34A" />
+            <Text style={styles.statusLabel}>Soil Moisture</Text>
+            <Text style={styles.statusValue}>80%</Text>
+          </View>
+        </TouchableOpacity>
 
-        <View style={styles.statusCard}>
-          <MaterialCommunityIcons
-            name="weather-sunny"
-            size={30}
-            color="#FFC107"
-          />
-          <Text style={styles.statusLabel}>Light Intensity</Text>
-          <Text style={styles.statusValue}>High</Text>
-        </View>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Light Intensity")}
+        >
+          <View style={styles.statusCard}>
+            <MaterialCommunityIcons
+              name="weather-sunny"
+              size={30}
+              color="#FFC107"
+            />
+            <Text style={styles.statusLabel}>Light Intensity</Text>
+            <Text style={styles.statusValue}>High</Text>
+          </View>
+        </TouchableOpacity>
       </ScrollView>
 
-      {/* Control Buttons */}
       <View style={styles.controlContainer}>
         <TouchableOpacity
           style={[
             styles.controlButton,
-            lightsOn && { backgroundColor: "#FFEB3B" }, // Yellow background if lights are on
+            lightsOn && { backgroundColor: "#FFEB3B" },
           ]}
           onPress={handleLightsToggle}
         >
@@ -87,7 +96,7 @@ const App = () => {
         <TouchableOpacity
           style={[
             styles.controlButton,
-            waterOn && { backgroundColor: "#2196F3" }, // Blue background if water is on
+            waterOn && { backgroundColor: "#2196F3" },
           ]}
           onPress={handleWaterToggle}
         >
@@ -101,19 +110,8 @@ const App = () => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.controlButton,
-            fanOn && { backgroundColor: "#00BCD4" }, // Cyan background if fan is on
-          ]}
-          onPress={handleFanToggle}
-        >
-          <MaterialCommunityIcons
-            name="fan"
-            size={30}
-            color={fanOn ? "#FFF" : "#00BCD4"}
-          />
-          <Text style={styles.controlLabel}>Fan {fanOn ? "On" : "Off"}</Text>
+        <TouchableOpacity style={styles.settingsButton}>
+          <Ionicons name="settings-outline" size={24} color="#6B7280" />
         </TouchableOpacity>
       </View>
     </View>
@@ -123,7 +121,7 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "linear-gradient(180deg, #A3E635 0%, #059669 100%)", // Lime to green gradient
+    backgroundColor: "#A3E635", // Solid background color
     paddingHorizontal: 20,
     paddingVertical: 16,
     justifyContent: "space-between",
@@ -138,7 +136,14 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#065F46", // Dark green text
+    color: "#065F46",
+  },
+  dashboardTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#065F46",
+    textAlign: "center",
   },
   scrollView: {
     flexDirection: "row",
@@ -156,17 +161,17 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 5, // For Android shadow
+    elevation: 5,
   },
   statusLabel: {
     fontSize: 18,
-    color: "#6B7280", // Muted gray
+    color: "#6B7280",
     marginTop: 8,
   },
   statusValue: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#065F46", // Green text
+    color: "#065F46",
     marginTop: 4,
   },
   controlContainer: {
@@ -186,11 +191,23 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  settingsButton: {
+    backgroundColor: "#FFF",
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
   controlLabel: {
     fontSize: 18,
-    color: "#6B7280", // Muted gray
+    color: "#6B7280",
     marginTop: 8,
   },
 });
 
-export default App;
+export default HomeScreen;
