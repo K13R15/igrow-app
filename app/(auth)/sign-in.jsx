@@ -14,7 +14,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient"; // Add gradient for background
 import { images } from "../../constants";
 import { CustomButton, FormField } from "../../components";
-import { getCurrentUser, signIn } from "../../lib/appwrite";
+import { getCurrentUser, signIn } from "../../lib/mysql";
 import { useGlobalContext } from "../../context/GlobalProvider";
 
 const SignIn = () => {
