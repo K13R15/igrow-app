@@ -4,8 +4,11 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack"; // For stack navigation
 import Ionicons from "react-native-vector-icons/Ionicons";
 import HomeScreen from "./(tabs)/home"; // Main dashboard screen
-import SettingsScreen from "./(tabs)/settings";
-import TemperatureScreen from "./(tabs)/Temperature"; // Temperature detail screen
+import SettingsScreen from "./settings";
+import TemperatureScreen from "./Temperature"; // Temperature detail screen
+import HumidityScreen from "./Humidity";
+import SoilMoistureScreen from "./SoilMoisture";
+import LightIntensityScreen from "./LightIntensity";
 
 // Create stack for Home tab
 const Stack = createStackNavigator();
@@ -21,6 +24,26 @@ const HomeStackNavigator = () => {
         name="Temperature"
         component={TemperatureScreen}
         options={{ title: "Temperature Details" }}
+      />
+      <Stack.Screen
+        name="settings"
+        component={SettingsScreen}
+        options={{ title: "settings" }}
+      />
+      <Stack.Screen
+        name="Humidity"
+        component={HumidityScreen}
+        options={{ title: "Humidity Details" }}
+      />
+      <Stack.Screen
+        name="Soil Moisture"
+        component={SoilMoistureScreen}
+        options={{ title: "Soil Moisture Details" }}
+      />
+      <Stack.Screen
+        name="Light Intensity"
+        component={LightIntensityScreen}
+        options={{ title: "Light Intensity Details" }}
       />
     </Stack.Navigator>
   );
@@ -39,7 +62,7 @@ const AppNavigator = () => {
             if (route.name === "HomeTab") {
               iconName = focused ? "home" : "home-outline";
             } else if (route.name === "Settings") {
-              iconName = focused ? "settings" : "settings-outline";
+              iconName = focused ? "Settings" : "settings-outline";
             }
 
             return <Ionicons name={iconName} size={size} color={color} />;

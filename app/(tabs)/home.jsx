@@ -14,9 +14,8 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 
-const HomeScreen = () => {
-  const navigation = useNavigation();
-  console.log(navigation);
+function HomeScreen() {
+  const navigation = useNavigation(); // Consistent use of useNavigation
   const [lightsOn, setLightsOn] = useState(false);
   const [waterOn, setWaterOn] = useState(false);
 
@@ -32,7 +31,10 @@ const HomeScreen = () => {
 
       <Text style={styles.dashboardTitle}>Environment Overview</Text>
       <ScrollView contentContainerStyle={styles.scrollView}>
-        <TouchableOpacity onPress={() => navigation.navigate("Temperature")}>
+        {/* Temperature Button */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Temperature")} // Using useNavigation
+        >
           <View style={styles.statusCard}>
             <MaterialCommunityIcons
               name="temperature-celsius"
@@ -52,7 +54,7 @@ const HomeScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("Soil Moisture")}>
+        <TouchableOpacity onPress={() => navigation.navigate("SoilMoisture")}>
           <View style={styles.statusCard}>
             <FontAwesome5 name="seedling" size={30} color="#8BC34A" />
             <Text style={styles.statusLabel}>Soil Moisture</Text>
@@ -60,9 +62,7 @@ const HomeScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Light Intensity")}
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("LightIntensity")}>
           <View style={styles.statusCard}>
             <MaterialCommunityIcons
               name="weather-sunny"
@@ -110,13 +110,16 @@ const HomeScreen = () => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.settingsButton}>
-          <Ionicons name="settings-outline" size={24} color="#6B7280" />
+        <TouchableOpacity
+          style={styles.settingsButton}
+          onPress={() => navigation.navigate("settings")}
+        >
+          <Ionicons name="settings-outline" size={30} color="#6B7280" />
         </TouchableOpacity>
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
