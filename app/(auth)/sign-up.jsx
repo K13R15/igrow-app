@@ -13,7 +13,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient"; // Add gradient for background
 
 import { images } from "../../constants";
-import { createUser } from "../../lib/appwrite";
+import { createUser } from "../../lib/mysql";
 import { CustomButton, FormField } from "../../components";
 import { useGlobalContext } from "../../context/GlobalProvider";
 

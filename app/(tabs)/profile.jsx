@@ -3,7 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
 
 import { icons } from "../../constants";
-import { signOut } from "../../lib/appwrite";
+import { signOut } from "../../lib/mysql";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { InfoBox } from "../../components";
 
