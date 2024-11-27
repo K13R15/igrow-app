@@ -15,7 +15,7 @@ import {
 } from "@expo/vector-icons";
 
 function HomeScreen() {
-  const navigation = useNavigation(); // Consistent use of useNavigation
+  const navigation = useNavigation();
   const [lightsOn, setLightsOn] = useState(false);
   const [waterOn, setWaterOn] = useState(false);
 
@@ -31,10 +31,7 @@ function HomeScreen() {
 
       <Text style={styles.dashboardTitle}>Environment Overview</Text>
       <ScrollView contentContainerStyle={styles.scrollView}>
-        {/* Temperature Button */}
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Temperature")} // Using useNavigation
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("Temperature")}>
           <View style={styles.statusCard}>
             <MaterialCommunityIcons
               name="temperature-celsius"
@@ -114,7 +111,7 @@ function HomeScreen() {
           style={styles.settingsButton}
           onPress={() => navigation.navigate("settings")}
         >
-          <Ionicons name="settings-outline" size={30} color="#6B7280" />
+          <Ionicons name="leaf-outline" size={40} color="#4CAF50" />
         </TouchableOpacity>
       </View>
     </View>
@@ -124,7 +121,7 @@ function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#A3E635", // Solid background color
+    backgroundColor: "#A3E635",
     paddingHorizontal: 20,
     paddingVertical: 16,
     justifyContent: "space-between",
@@ -195,11 +192,12 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   settingsButton: {
+    width: 70,
+    height: 70,
     backgroundColor: "#FFF",
-    paddingVertical: 16,
-    paddingHorizontal: 12,
     borderRadius: 16,
     alignItems: "center",
+    justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
