@@ -56,7 +56,7 @@ const TemperatureScreen = () => {
           // mode: 'no-cors', // Disables CORS
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer sa-1-igrow-c961675c-a8f9-4201-883b-9f3ea87e1983", // Replace with your Grafana API key
+            "Authorization": "Bearer ", // Replace with your Grafana API key
           },
           body: JSON.stringify({
             query: `SELECT mean("temperature") FROM "sensor_data" WHERE time >= ${timeFrom}ms and time <= ${timeTo}ms GROUP BY time(10s) fill(null) ORDER BY time ASC`,

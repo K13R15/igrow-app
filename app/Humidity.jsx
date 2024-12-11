@@ -26,7 +26,7 @@ const HumidityScreen = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer glsa_ypeUD6wVC1PVvqV8ORXHeVFmkx4kMofU_293241b2", // Replace with your Grafana API key
+            "Authorization": "Bearer ", // Replace with your Grafana API key
           },
           body: JSON.stringify({
             query: `SELECT mean("humidity") FROM "sensor_data" WHERE time >= ${timeFrom}ms and time <= ${timeTo}ms GROUP BY time(10s) fill(null) ORDER BY time ASC`,
