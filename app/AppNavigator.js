@@ -4,7 +4,6 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack"; // For stack navigation
 import Ionicons from "react-native-vector-icons/Ionicons";
 import HomeScreen from "./(tabs)/home"; // Main dashboard screen
-import SettingsScreen from "./settings";
 import TemperatureScreen from "./Temperature"; // Temperature detail screen
 import HumidityScreen from "./Humidity";
 import SoilMoistureScreen from "./SoilMoisture";

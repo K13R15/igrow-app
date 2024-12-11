@@ -1,4 +1,3 @@
-// App.js
 import React from "react";
 import AppNavigator from "./AppNavigator"; // Adjust path accordingly
 

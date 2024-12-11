@@ -1,5 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
+import { toggleWater } from "../esp32Control"; // Import the toggleWater function from esp32Control.js
 import {
   Text,
   View,
@@ -16,11 +17,16 @@ import {
 
 function HomeScreen() {
   const navigation = useNavigation();
-  const [lightsOn, setLightsOn] = useState(false);
   const [waterOn, setWaterOn] = useState(false);
 
-  const handleLightsToggle = () => setLightsOn(!lightsOn);
-  const handleWaterToggle = () => setWaterOn(!waterOn);
+  // Function to toggle water on/off
+  const handleWaterToggle = async () => {
+    try {
+      await toggleWater(waterOn, setWaterOn); // Use the imported toggleWater function
+    } catch (error) {
+      console.error("Failed to toggle water:", error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -76,43 +82,21 @@ function HomeScreen() {
         <TouchableOpacity
           style={[
             styles.controlButton,
-            lightsOn && { backgroundColor: "#FFEB3B" },
+            waterOn && { backgroundColor: "#2196F3" }, // Blue background when water is on
           ]}
-          onPress={handleLightsToggle}
-        >
-          <Ionicons
-            name="bulb"
-            size={30}
-            color={lightsOn ? "#FFF" : "#FFEB3B"}
-          />
-          <Text style={styles.controlLabel}>
-            Lights {lightsOn ? "On" : "Off"}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.controlButton,
-            waterOn && { backgroundColor: "#2196F3" },
-          ]}
-          onPress={handleWaterToggle}
+          onPress={handleWaterToggle} // Toggle water on/off when clicked
         >
           <Ionicons
             name="water-outline"
             size={30}
-            color={waterOn ? "#FFF" : "#2196F3"}
+            color={waterOn ? "#FFF" : "#2196F3"} // White color when water is on, blue when off
           />
           <Text style={styles.controlLabel}>
-            Water {waterOn ? "On" : "Off"}
+            Water {waterOn ? "On" : "Off"} {/* Change text based on state */}
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.settingsButton}
-          onPress={() => navigation.navigate("settings")}
-        >
-          <Ionicons name="leaf-outline" size={40} color="#4CAF50" />
-        </TouchableOpacity>
+        
       </View>
     </View>
   );
@@ -176,28 +160,17 @@ const styles = StyleSheet.create({
   },
   controlContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "center",
+    alignItems: "center",
     marginVertical: 20,
   },
   controlButton: {
-    width: "30%",
+    width: "40%",
     backgroundColor: "#FFF",
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  settingsButton: {
-    width: 70,
-    height: 70,
-    backgroundColor: "#FFF",
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
+    marginHorizontal: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,

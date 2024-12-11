@@ -34,13 +34,7 @@ const Profile = () => {
   return (
     <SafeAreaView style={styles.container}>
       {/* Guide Button */}
-      <TouchableOpacity
-        style={styles.helpButton}
-        onPress={() => router.push("/help")}
-      >
-        <Ionicons name="help-circle" size={24} color="#FFF" />
-        <Text style={styles.helpButtonText}>Guide</Text>
-      </TouchableOpacity>
+      
 
       <View style={styles.content}>
         {/* Logout Button */}
@@ -83,22 +77,8 @@ const Profile = () => {
           defaultValue=""
         />
 
-        {/* Activity Summary */}
-        <Text style={styles.sectionTitle}>Activity Summary</Text>
-        <FlatList
-          data={[
-            { id: "1", label: "🌱 Plants Monitored", value: "5" },
-            { id: "2", label: "💧 Today's Watering", value: "Complete" },
-            { id: "3", label: "⚠️ Alerts", value: "1 (Check Soil Moisture)" },
-          ]}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>{item.label}</Text>
-              <Text style={styles.summaryValue}>{item.value}</Text>
-            </View>
-          )}
-        />
+        
+          
       </View>
     </SafeAreaView>
   );
