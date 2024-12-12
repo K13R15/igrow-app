@@ -50,24 +50,23 @@ const TemperatureScreen = () => {
         const currentTime = getCurrentTime();
         const timeFrom = currentTime - 10000; // 10 seconds ago
         const timeTo = currentTime;
-
+  
         const response = await fetch(apiUrl, {
           method: "POST",
-          // mode: 'no-cors', // Disables CORS
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer ", // Replace with your Grafana API key
+            "Authorization": "Bearer sa-1-igrow-c961675c-a8f9-4201-883b-9f3ea87e1983", // Replace with your Grafana API key
           },
           body: JSON.stringify({
             query: `SELECT mean("temperature") FROM "sensor_data" WHERE time >= ${timeFrom}ms and time <= ${timeTo}ms GROUP BY time(10s) fill(null) ORDER BY time ASC`,
           }),
         });
-
+  
         const data = await response.json();
-
-        
+        console.log(data);
+  
+        // Check if data is available and display the temperature
         if (data.results[0]?.series[0]?.values.length > 0) {
-          // Assuming the temperature is in `data.results[0].series[0].values[0][1]`
           const newTemperature = data.results[0].series[0].values[0][1];
           setTemperature(newTemperature + "°C");
         } else {
@@ -78,13 +77,14 @@ const TemperatureScreen = () => {
         setTemperature("Error");
       }
     };
-
+  
     fetchTemperature();
-
+  
     // Poll data every 10 seconds
     const interval = setInterval(fetchTemperature, 10000);
     return () => clearInterval(interval);
   }, []);
+  
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>

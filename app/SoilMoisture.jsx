@@ -23,7 +23,7 @@ const SoilMoistureScreen = () => {
         const timeTo = currentTime;
 
         const response = await fetch(apiUrl, {
-          method: "POST",
+          method: "POST", 
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer ", // Replace with your Grafana API key
