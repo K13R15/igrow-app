@@ -23,17 +23,10 @@ const SoilMoistureScreen = () => {
         const timeTo = currentTime;
 
         const response = await fetch(apiUrl, {
-<<<<<<< HEAD
           method: "POST", 
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer ", // Replace with your Grafana API key
-=======
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer glsa_ypeUD6wVC1PVvqV8ORXHeVFmkx4kMofU_293241b2", // Replace with your Grafana API key
->>>>>>> 45673bd (Added Dashboard for sensors)
           },
           body: JSON.stringify({
             query: `SELECT mean("moisture") FROM "sensor_data" WHERE time >= ${timeFrom}ms and time <= ${timeTo}ms GROUP BY time(10s) fill(null) ORDER BY time ASC`,
