@@ -47,6 +47,7 @@
     "react-native": "0.74.5",
     "react-native-animatable": "^1.4.0",
     "react-native-appwrite": "^0.2.2",
+    "react-native-dotenv": "^3.4.11",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-push-notification": "^8.1.1",
     "react-native-reanimated": "~3.10.1",
