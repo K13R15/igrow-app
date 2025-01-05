@@ -1,21 +1,26 @@
-import React from "react";
-import { useState } from "react";
-import { Link, router } from "expo-router";
+import React, { useState } from "react";
+import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
   Text,
   ScrollView,
-  Dimensions,
-  Alert,
   Image,
   StyleSheet,
+  Dimensions,
+  Alert,
+  ImageBackground,
+  TouchableOpacity,
+  Switch,
+  TextInput,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient"; // Add gradient for background
+import { BlurView } from "expo-blur";
 import { images } from "../../constants";
-import { CustomButton, FormField } from "../../components";
+import { CustomButton } from "../../components";
 import { getCurrentUser, signIn } from "../../lib/appwrite";
 import { useGlobalContext } from "../../context/GlobalProvider";
+
+const { width, height } = Dimensions.get("window");
 
 const SignIn = () => {
   const { setUser, setIsLogged } = useGlobalContext();
@@ -24,6 +29,7 @@ const SignIn = () => {
     email: "",
     password: "",
   });
+  const [rememberPassword, setRememberPassword] = useState(false);
 
   const submit = async () => {
     if (form.email === "" || form.password === "") {
@@ -49,46 +55,68 @@ const SignIn = () => {
   };
 
   return (
-    <LinearGradient // Added a gradient background
-      colors={["#A3E635", "#059669"]}
-      style={styles.container}
+    <ImageBackground
+      source={{ uri: "/placeholder.svg?height=1080&width=1920" }}
+      style={styles.backgroundImage}
     >
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView>
-          <View
-            style={[
-              styles.contentContainer,
-              { minHeight: Dimensions.get("window").height - 100 },
-            ]}
-          >
-            {/* Centering and resizing the logo */}
-            <Image
-              source={images.logo}
-              resizeMode="contain"
-              style={styles.logo}
-            />
-
-            <Text style={styles.title}>
-              Log in to <Text style={styles.highlightText}>iGROW</Text>
-            </Text>
-
-            {/* Card-like form */}
-            <View style={styles.formCard}>
-              <FormField
-                title="Email"
-                value={form.email}
-                handleChangeText={(e) => setForm({ ...form, email: e })}
-                otherStyles={styles.formField}
-                keyboardType="email-address"
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          <View style={styles.contentContainer}>
+            {/* Left Column */}
+            <View style={styles.leftColumn}>
+              <Image
+                source={images.logo}
+                resizeMode="contain"
+                style={styles.logo}
               />
+              <Text style={styles.message}>
+                Nurture your financial growth with iGROW </Text>
+              <Text style={styles.message}>
+                 Sign in to explore your path to prosperity.
+              </Text>
+            </View>
 
-              <FormField
-                title="Password"
-                value={form.password}
-                handleChangeText={(e) => setForm({ ...form, password: e })}
-                otherStyles={styles.formField}
-                secureTextEntry={true}
-              />
+            {/* Right Column */}
+            <BlurView intensity={80} tint="light" style={styles.rightColumn}>
+              <Text style={styles.title}>
+                Welcome to <Text style={styles.highlightText}>iGROW</Text>
+              </Text>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Email</Text>
+                <TextInput
+                  style={styles.input}
+                  value={form.email}
+                  onChangeText={(text) => setForm({ ...form, email: text })}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Password</Text>
+                <TextInput
+                  style={styles.input}
+                  value={form.password}
+                  onChangeText={(text) => setForm({ ...form, password: text })}
+                  secureTextEntry
+                />
+              </View>
+
+              <View style={styles.optionsContainer}>
+                <View style={styles.rememberPasswordContainer}>
+                  <Switch
+                    value={rememberPassword}
+                    onValueChange={setRememberPassword}
+                    trackColor={{ false: "#767577", true: "#059669" }}
+                    thumbColor={rememberPassword ? "#f4f3f4" : "#f4f3f4"}
+                  />
+                  <Text style={styles.rememberPasswordText}>Remember password</Text>
+                </View>
+                <TouchableOpacity onPress={() => router.push("/forgot-password")}>
+                  <Text style={styles.forgotPasswordLink}>Forgot password?</Text>
+                </TouchableOpacity>
+              </View>
 
               <CustomButton
                 title="Sign In"
@@ -97,79 +125,120 @@ const SignIn = () => {
                 textStyles={styles.buttonText}
                 isLoading={isSubmitting}
               />
-            </View>
 
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Don't have an account?</Text>
-              <Link href="/sign-up" style={styles.signUpLink}>
-                Signup
-              </Link>
-            </View>
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>Don't have an account?</Text>
+                <TouchableOpacity onPress={() => router.push("/sign-up")}>
+                  <Text style={styles.signUpLink}>Sign Up</Text>
+                </TouchableOpacity>
+              </View>
+            </BlurView>
           </View>
         </ScrollView>
       </SafeAreaView>
-    </LinearGradient>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  backgroundImage: {
     flex: 1,
+    width: '100%',
+    height: '100%',
   },
   safeArea: {
     flex: 1,
   },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
   contentContainer: {
-    width: "100%",
+    flex: 1,
+    flexDirection: "row",
+  },
+  leftColumn: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 16,
-    marginTop: 40,
+    padding: 24,
+    backgroundColor: 'rgba(34, 197, 94, 0.2)', // Light green with opacity
+  },
+  rightColumn: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 24,
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
   },
   logo: {
-    width: 115,
-    height: 64,
-    marginBottom: 40,
+    width: width * 0.25,
+    height: width * 0.25,
+    marginBottom: 24,
+  },
+  message: {
+    fontSize: 18,
+    color: "#064E3B", // Dark green
+    textAlign: "center",
+    marginBottom: 24,
+    fontWeight: "600",
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     textAlign: "center",
     fontWeight: "bold",
-    color: "#065F46", // Primary text color (dark green)
-    marginTop: 20,
+    color: "#065F46", // Dark green
+    marginBottom: 30,
   },
   highlightText: {
-    color: "#15803D", // Green text color for emphasis
+    color: "#059669", // Medium green
   },
-  formCard: {
-    backgroundColor: "#FFF", // White background for contrast
-    padding: 20,
-    borderRadius: 16,
-    width: "90%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5, // For Android shadow
-    marginTop: 20,
+  inputContainer: {
+    marginBottom: 20,
   },
-  formField: {
-    marginTop: 20,
+  inputLabel: {
+    fontSize: 16,
+    color: "#064E3B",
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#000000",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+  },
+  optionsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  rememberPasswordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  rememberPasswordText: {
+    marginLeft: 8,
+    color: "#064E3B",
+  },
+  forgotPasswordLink: {
+    color: "#059669",
+    fontWeight: "600",
   },
   signInButton: {
     width: "100%",
     marginTop: 28,
-    backgroundColor: "#065F46", // Emerald green background for button
-    borderRadius: 50,
+    backgroundColor: "#059669", // Medium green
+    borderRadius: 12,
     paddingVertical: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: "#064E3B",
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5, // For Android shadow
+    shadowRadius: 8,
+    elevation: 5,
   },
   buttonText: {
-    color: "#FFF",
+    color: "#FFFFFF",
     textAlign: "center",
     fontSize: 18,
     fontWeight: "600",
@@ -177,18 +246,19 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: "row",
     justifyContent: "center",
-    paddingTop: 20,
+    marginTop: 24,
   },
   footerText: {
     fontSize: 16,
-    color: "#9CA3AF", // Muted gray text color
+    color: "#065F46", // Dark green
   },
   signUpLink: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#34D399", // Light green link color
+    color: "#059669", // Medium green
     marginLeft: 8,
   },
 });
 
 export default SignIn;
+

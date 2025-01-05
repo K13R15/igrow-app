@@ -56,21 +56,6 @@ const TabLayout = () => {
             ),
           }}
         />
-        <Tabs.Screen
-          name="notification"
-          options={{
-            title: "Notification",
-            headerShown: false,
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon
-                icon={icons.notification}
-                color={color}
-                name="Notification"
-                focused={focused}
-              />
-            ),
-          }}
-        />
 
         <Tabs.Screen
           name="history"
@@ -82,6 +67,22 @@ const TabLayout = () => {
                 icon={icons.history}
                 color={color}
                 name="History"
+                focused={focused}
+              />
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="schedule"
+          options={{
+            title: "Schedule",
+            headerShown: false,
+            tabBarIcon: ({ color, focused }) => (
+              <TabIcon
+                icon={icons.calendar} // Add calendar icon to your constants
+                color={color}
+                name="Schedule"
                 focused={focused}
               />
             ),

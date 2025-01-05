@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 256, // 64 * 4 for scaling
-    height: 96, // 24 * 4 for scaling
+    height: 256, // 24 * 4 for scaling
     marginBottom: 20,
     borderWidth: 2,
     borderColor: "#16A34A", // Green border
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     color: "#16A34A", // Lighter green
   },
   buttonContainer: {
-    width: "100%",
+    width: "25%",
     marginTop: 28,
     backgroundColor: "#15803D", // Dark green
     borderRadius: 50,

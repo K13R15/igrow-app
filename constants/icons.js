@@ -14,6 +14,7 @@ import play from "../assets/icons/play.png";
 import setting from "../assets/icons/settings.png";
 import notification from "../assets/icons/notification.png";
 import history from "../assets/icons/history.png";
+import calendar from "../assets/icons/calendar.png"
 
 export default {
   play,
@@ -32,4 +33,5 @@ export default {
   setting,
   notification,
   history,
+  calendar
 };

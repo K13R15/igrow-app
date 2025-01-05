@@ -1,37 +1,52 @@
-import { useState } from "react";
-import { Link, router } from "expo-router";
+import React, { useState } from "react";
+import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
   Text,
   ScrollView,
-  Dimensions,
-  Alert,
   Image,
   StyleSheet,
+  Dimensions,
+  Alert,
+  ImageBackground,
   TouchableOpacity,
+  Switch,
+  TextInput,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient"; 
-
+import { BlurView } from "expo-blur";
 import { images } from "../../constants";
+import { CustomButton } from "../../components";
 import { createUser } from "../../lib/appwrite";
-import { CustomButton, FormField } from "../../components";
 import { useGlobalContext } from "../../context/GlobalProvider";
+
+const { width, height } = Dimensions.get("window");
 
 const SignUp = () => {
   const { setUser, setIsLogged } = useGlobalContext();
-
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
-  const [showPassword, setShowPassword] = useState(false); // Toggle state
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberPassword, setRememberPassword] = useState(false);
 
   const submit = async () => {
-    if (!form.username || !form.email || !form.password) {
+    if (
+      !form.username ||
+      !form.email ||
+      !form.password ||
+      !form.confirmPassword
+    ) {
       Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
       return;
     }
 
@@ -49,53 +64,83 @@ const SignUp = () => {
   };
 
   return (
-    <LinearGradient colors={["#A3E635", "#059669"]} style={styles.container}>
-      <SafeAreaView style={styles.container}>
-        <ScrollView>
-          <View
-            style={[
-              styles.contentContainer,
-              { minHeight: Dimensions.get("window").height - 100 },
-            ]}
-          >
-            <Image source={images.logo} resizeMode="contain" style={styles.logo} />
+    <ImageBackground
+      source={{ uri: "/placeholder.svg?height=1080&width=1920" }}
+      style={styles.backgroundImage}
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          <View style={styles.contentContainer}>
+            {/* Left Column */}
+            <BlurView intensity={80} tint="light" style={styles.leftColumn}>
+              <Text style={styles.title}>
+                Join <Text style={styles.highlightText}>iGROW</Text>
+              </Text>
 
-            <Text style={styles.title}>
-              Sign Up to <Text style={styles.highlightText}>iGROW</Text>
-            </Text>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Username</Text>
+                <TextInput
+                  style={styles.input}
+                  value={form.username}
+                  onChangeText={(text) => setForm({ ...form, username: text })}
+                  autoCapitalize="none"
+                />
+              </View>
 
-            <View style={styles.formCard}>
-              <FormField
-                title="Username"
-                value={form.username}
-                handleChangeText={(e) => setForm({ ...form, username: e })}
-                otherStyles={styles.formField}
-              />
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Email</Text>
+                <TextInput
+                  style={styles.input}
+                  value={form.email}
+                  onChangeText={(text) => setForm({ ...form, email: text })}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
 
-              <FormField
-                title="Email"
-                value={form.email}
-                handleChangeText={(e) => setForm({ ...form, email: e })}
-                otherStyles={styles.formField}
-                keyboardType="email-address"
-              />
-
-              <View style={styles.passwordContainer}>
-                <FormField
-                  title="Password"
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Password</Text>
+                <TextInput
+                  style={styles.input}
                   value={form.password}
-                  handleChangeText={(e) => setForm({ ...form, password: e })}
-                  otherStyles={styles.formField}
+                  onChangeText={(text) => setForm({ ...form, password: text })}
                   secureTextEntry={!showPassword}
                 />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Confirm Password</Text>
+                <TextInput
+                  style={styles.input}
+                  value={form.confirmPassword}
+                  onChangeText={(text) =>
+                    setForm({ ...form, confirmPassword: text })
+                  }
+                  secureTextEntry={!showPassword}
+                />
+              </View>
+
+              <View style={styles.passwordOptionsContainer}>
                 <TouchableOpacity
                   style={styles.showButton}
                   onPress={() => setShowPassword(!showPassword)}
                 >
                   <Text style={styles.showButtonText}>
-                    {showPassword ? "Hide" : "Show"}
+                    {showPassword ? "Hide" : "Show"} Password
                   </Text>
                 </TouchableOpacity>
+
+                <View style={styles.rememberPasswordContainer}>
+                  <Switch
+                    value={rememberPassword}
+                    onValueChange={setRememberPassword}
+                    trackColor={{ false: "#767577", true: "#059669" }}
+                    thumbColor={rememberPassword ? "#f4f3f4" : "#f4f3f4"}
+                  />
+                  <Text style={styles.rememberPasswordText}>
+                    Remember password
+                  </Text>
+                </View>
               </View>
 
               <CustomButton
@@ -105,91 +150,139 @@ const SignUp = () => {
                 textStyles={styles.buttonText}
                 isLoading={isSubmitting}
               />
-            </View>
 
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Have an account?</Text>
-              <Link href="/sign-in" style={styles.signInLink}>
-                Sign in
-              </Link>
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>Have an account?</Text>
+                <TouchableOpacity onPress={() => router.push("/sign-in")}>
+                  <Text style={styles.signInLink}>Sign in</Text>
+                </TouchableOpacity>
+              </View>
+            </BlurView>
+
+            {/* Right Column */}
+            <View style={styles.rightColumn}>
+              <Image
+                source={images.logo}
+                resizeMode="contain"
+                style={styles.logo}
+              />
+              <Text style={styles.message}>
+                Plant the seeds of your financial future
+              </Text>
+              <Text style={styles.message}>
+                Join iGROW and watch   your wealth flourish
+              </Text>
             </View>
           </View>
         </ScrollView>
       </SafeAreaView>
-    </LinearGradient>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  safeArea: {
     flex: 1,
   },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
   contentContainer: {
-    width: "100%",
+    flex: 1,
+    flexDirection: "row",
+  },
+  leftColumn: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 24,
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+  },
+  rightColumn: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 16,
-    marginTop: 40,
+    padding: 24,
+    backgroundColor: "rgba(34, 197, 94, 0.2)", // Light green with opacity
   },
   logo: {
-    width: 115,
-    height: 64,
-    marginBottom: 40,
+    width: width * 0.25,
+    height: width * 0.25,
+    marginBottom: 24,
+  },
+  message: {
+    fontSize: 18,
+    color: "#064E3B", // Dark green
+    textAlign: "center",
+    marginBottom: 24,
+    fontWeight: "600",
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     textAlign: "center",
     fontWeight: "bold",
-    color: "#065F46",
-    marginTop: 20,
+    color: "#065F46", // Dark green
+    marginBottom: 30,
   },
   highlightText: {
-    color: "#15803D",
+    color: "#059669", // Medium green
   },
-  formCard: {
-    backgroundColor: "#FFF",
-    padding: 20,
-    borderRadius: 16,
-    width: "90%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-    marginTop: 20,
+  inputContainer: {
+    marginBottom: 20,
   },
-  formField: {
-    marginTop: 20,
+  inputLabel: {
+    fontSize: 16,
+    color: "#064E3B",
+    marginBottom: 8,
   },
-  passwordContainer: {
+  input: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#000000",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+  },
+  passwordOptionsContainer: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    position: "relative",
+    marginBottom: 20,
   },
   showButton: {
-    position: "absolute",
-    right: 10,
-    top: 50,
+    padding: 8,
   },
   showButtonText: {
-    color: "#34D399",
+    color: "#059669", // Medium green
     fontSize: 16,
     fontWeight: "bold",
+  },
+  rememberPasswordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  rememberPasswordText: {
+    marginLeft: 8,
+    color: "#064E3B",
   },
   signUpButton: {
     width: "100%",
     marginTop: 28,
-    backgroundColor: "#065F46",
-    borderRadius: 50,
+    backgroundColor: "#059669", // Medium green
+    borderRadius: 12,
     paddingVertical: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: "#064E3B",
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowRadius: 8,
     elevation: 5,
   },
   buttonText: {
-    color: "#FFF",
+    color: "#FFFFFF",
     textAlign: "center",
     fontSize: 18,
     fontWeight: "600",
@@ -197,16 +290,16 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: "row",
     justifyContent: "center",
-    paddingTop: 20,
+    marginTop: 24,
   },
   footerText: {
     fontSize: 16,
-    color: "#9CA3AF",
+    color: "#065F46", // Dark green
   },
   signInLink: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#34D399",
+    color: "#059669", // Medium green
     marginLeft: 8,
   },
 });
