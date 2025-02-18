@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { toggleWater } from "../esp32Control"; // Import the toggleWater function
+import { toggleWater, togglePesticide } from "../esp32Control"; // Import the toggleWater function
 import {
   logWateringEvent,
   logSoilMoistureEvent,
   logHumidityEvent,
   logLightIntensityEvent,
   checkTemperatureEvent,
+  logPhEvent,
   account,
 } from "../../lib/appwrite"; // Import the necessary functions
 import {
@@ -18,6 +19,7 @@ import {
   Dimensions,
   ImageBackground,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import {
   Ionicons,
@@ -26,6 +28,18 @@ import {
 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Svg, Path } from "react-native-svg";
+import { WebView } from "react-native-webview";
+import { Platform } from "react-native";
+import AlertModal from "../../components/AlertModal";
+import { wsManager } from "../utils/websocket";
+
+// Add these constants at the top of the file, after imports
+const MOISTURE_THRESHOLDS = {
+  ALERT: 75, // Alert threshold
+  SAFE: 70, // Safe operating threshold
+  HIGH: 85, // High moisture warning
+  VERY_HIGH: 90, // Critical moisture level
+};
 
 // SVG background pattern
 const LeafPattern = () => (
@@ -61,6 +75,36 @@ function HomeScreen() {
   const [waterOn, setWaterOn] = useState(false);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [intensityLevel, setIntensityLevel] = useState("High"); // Default value as a placeholder
+  const [phLevel, setPhLevel] = useState(null);
+  const [pesticideOn, setPesticideOn] = useState(false);
+  const [moistureLevel, setMoistureLevel] = useState(0); // Add this state for tracking moisture level
+  const [isLoading, setIsLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalConfig, setModalConfig] = useState({
+    title: "",
+    message: "",
+    type: "warning",
+  });
+
+  const webViewSource = {
+    uri: "http://raspi.local:3000/d/fe192lni2vdhca/plant-sensors?orgId=1&refresh=5s&viewPanel=3&fullscreen&kiosk",
+  };
+
+  const webViewSource1 = {
+    uri: "http://raspi.local:3000/d/fe192lni2vdhca/plant-sensors?orgId=1&viewPanel=1&fullscreen&kiosk",
+  };
+
+  const webViewSource2 = {
+    uri: "http://raspi.local:3000/d/fe192lni2vdhca/plant-sensors?orgId=1&refresh=5s&from=1734141181665&to=1734162781665&viewPanel=2&fullscreen&kiosk",
+  };
+
+  const webViewSource3 = {
+    uri: "http://raspi.local:3000/d/fe192lni2vdhca/plant-sensors?orgId=1&refresh=5s&viewPanel=9&fullscreen&kiosk",
+  };
+
+  const webViewSource4 = {
+    uri: "http://raspi.local:3000/d/fe192lni2vdhca/plant-sensors?orgId=1&viewPanel=4&fullscreen&kiosk",
+  };
 
   const handleCheckTemperature = async () => {
     if (!isUserLoggedIn) {
@@ -145,26 +189,111 @@ function HomeScreen() {
     }
   };
 
-  // Handle water toggle action
+  // Modify fetchMoistureLevel to handle errors better
+  const fetchMoistureLevel = async () => {
+    try {
+      const response = await fetch("http://192.168.50.19/moisture", {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data && typeof data.moisture === "number") {
+        console.log("Updated moisture level:", data.moisture);
+        setMoistureLevel(data.moisture);
+      } else {
+        console.error("Invalid moisture data format:", data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch moisture level:", error);
+      // Don't update state if there's an error
+    }
+  };
+
+  // Add this helper function
+  const showModal = (title, message, type = "warning") => {
+    setModalConfig({ title, message, type });
+    setModalVisible(true);
+  };
+
+  // Modify handleWaterToggle
   const handleWaterToggle = async () => {
     if (!isUserLoggedIn) {
-      Alert.alert(
+      showModal(
         "Login Required",
-        "You need to be logged in to toggle water."
+        "You need to be logged in to toggle water.",
+        "error"
       );
       return;
     }
 
     try {
-      await toggleWater(waterOn, setWaterOn); // Use toggleWater from esp32Control
-      console.log("Water toggled:", !waterOn);
+      setIsLoading(true);
 
-      // Log the watering event in Appwrite
+      console.log("Current moisture level:", moistureLevel);
+      console.log("Current water state:", waterOn);
+
+      if (moistureLevel >= 75) {
+        setIsLoading(false);
+        showModal(
+          "Moisture Level Too High",
+          `Cannot activate watering system: Soil moisture is currently at ${moistureLevel}%. The system prevents overwatering when moisture levels exceed 75%.`,
+          "warning"
+        );
+        return;
+      }
+
+      console.log("Attempting to toggle water...");
+      await toggleWater(waterOn, setWaterOn);
+      console.log("Water toggle successful");
+
       await logWateringEvent();
-      Alert.alert("Success", "Watering event logged.");
+      showModal(
+        "Success",
+        `Watering system has been ${waterOn ? "deactivated" : "activated"}.`,
+        "success"
+      );
     } catch (error) {
-      console.error("Failed to toggle water or log event:", error.message);
-      Alert.alert("Error", "Failed to log watering event.");
+      console.error("Water toggle error:", {
+        message: error.message,
+        stack: error.stack,
+        type: error.name,
+      });
+
+      if (error.message.includes("timed out")) {
+        showModal(
+          "Connection Timeout",
+          "Unable to reach the water control system. Please check your connection and try again.",
+          "error"
+        );
+      } else if (error.message.includes("Network request failed")) {
+        showModal(
+          "Network Error",
+          "Cannot connect to the water control system. Please check if the device is online.",
+          "error"
+        );
+      } else if (error.message.includes("cancelled")) {
+        showModal(
+          "Request Cancelled",
+          "The water control request was cancelled. Please try again.",
+          "error"
+        );
+      } else {
+        showModal(
+          "Error",
+          `Failed to toggle water system: ${error.message}`,
+          "error"
+        );
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -187,6 +316,190 @@ function HomeScreen() {
     }
   };
 
+  const handleCheckPh = async () => {
+    if (!isUserLoggedIn) {
+      Alert.alert(
+        "Login Required",
+        "You need to be logged in to check pH level."
+      );
+      return;
+    }
+
+    try {
+      await logPhEvent();
+      Alert.alert("Success", "pH level event logged.");
+    } catch (error) {
+      console.error("Failed to log pH event:", error.message);
+      Alert.alert("Error", "Failed to check pH level.");
+    }
+  };
+
+  // Modify handlePesticideToggle
+  const handlePesticideToggle = async () => {
+    if (!isUserLoggedIn) {
+      showModal(
+        "Login Required",
+        "You need to be logged in to toggle pesticide.",
+        "error"
+      );
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      // Use the current moisture level from state instead of fetching again
+      if (moistureLevel >= 75) {
+        setIsLoading(false);
+        showModal(
+          "Moisture Level Too High",
+          `Cannot apply pesticide: Soil moisture is currently at ${moistureLevel}%. The system prevents pesticide application when moisture levels exceed 75%.`,
+          "warning"
+        );
+        return;
+      }
+
+      await togglePesticide(pesticideOn, setPesticideOn);
+      showModal(
+        "Success",
+        `Pesticide system has been ${
+          pesticideOn ? "deactivated" : "activated"
+        }.`,
+        "success"
+      );
+    } catch (error) {
+      console.error("Pesticide toggle error:", {
+        message: error.message,
+        stack: error.stack,
+        type: error.name,
+      });
+
+      if (error.message.includes("already")) {
+        showModal(
+          "Information",
+          `Pesticide system is ${pesticideOn ? "already on" : "already off"}.`,
+          "info"
+        );
+      } else if (error.message.includes("timed out")) {
+        showModal(
+          "Connection Timeout",
+          "Unable to reach the pesticide control system. Please check your connection and try again.",
+          "error"
+        );
+      } else if (error.message.includes("Network request failed")) {
+        showModal(
+          "Network Error",
+          "Cannot connect to the pesticide control system. Please check if the device is online.",
+          "error"
+        );
+      } else {
+        showModal(
+          "Error",
+          `Failed to toggle pesticide system: ${error.message}`,
+          "error"
+        );
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Keep the useEffect for moisture level polling
+  useEffect(() => {
+    fetchMoistureLevel(); // Initial fetch
+    const interval = setInterval(fetchMoistureLevel, 5000); // Update every 5 seconds
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
+
+  // Add this useEffect for WebSocket handling
+  useEffect(() => {
+    const handleWebSocketMessage = (type, data) => {
+      if (type === "highMoisture") {
+        const severity =
+          data >= MOISTURE_THRESHOLDS.VERY_HIGH ? "error" : "warning";
+        showModal(
+          severity === "error"
+            ? "Critical Moisture Alert"
+            : "High Moisture Alert",
+          `High moisture level detected (${data}%)!\n\n` +
+            "This could indicate:\n" +
+            "• Overwatering\n" +
+            "• Poor drainage\n" +
+            "• Water leak\n" +
+            "• Recent rainfall\n\n" +
+            "Please check your plants and irrigation system immediately.",
+          severity
+        );
+      }
+    };
+
+    wsManager.addListener(handleWebSocketMessage);
+
+    // Cleanup on component unmount
+    return () => {
+      wsManager.removeListener(handleWebSocketMessage);
+    };
+  }, []);
+
+  // Update the checkMoistureLevel function
+  const checkMoistureLevel = async () => {
+    try {
+      const response = await fetch("http://192.168.50.19/moisture");
+      const data = await response.json();
+
+      // Update moisture level state
+      if (data && typeof data.moisture === "number") {
+        setMoistureLevel(data.moisture);
+      }
+
+      if (data.moisture >= MOISTURE_THRESHOLDS.ALERT) {
+        let severity = "warning";
+        let message = `Current soil moisture (${data.moisture}%) is above safe levels.\n\n`;
+
+        if (data.moisture >= MOISTURE_THRESHOLDS.VERY_HIGH) {
+          severity = "error";
+          message += "CRITICAL MOISTURE LEVEL!\n\n";
+        }
+
+        message +=
+          "Recommended actions:\n" +
+          "• Stop watering immediately\n" +
+          "• Check for proper drainage\n" +
+          "• Monitor for plant stress\n" +
+          "• Allow soil to dry\n" +
+          "• Check for water leaks";
+
+        showModal(
+          data.moisture >= MOISTURE_THRESHOLDS.VERY_HIGH
+            ? "Critical Moisture Warning"
+            : "High Moisture Warning",
+          message,
+          severity
+        );
+      }
+    } catch (error) {
+      console.error("Failed to check moisture:", error);
+      showModal(
+        "Error",
+        "Failed to check moisture levels. Please check your connection.",
+        "error"
+      );
+    }
+  };
+
+  // Add periodic moisture check
+  useEffect(() => {
+    // Initial check
+    checkMoistureLevel();
+
+    // Set up interval for periodic checks
+    const interval = setInterval(checkMoistureLevel, 60000); // Check every minute
+
+    // Cleanup on unmount
+    return () => clearInterval(interval);
+  }, []); // Empty dependency array means this runs once on mount
+
   return (
     <ImageBackground
       source={{ uri: "/placeholder.svg?height=1080&width=1920" }}
@@ -194,91 +507,51 @@ function HomeScreen() {
     >
       <LeafPattern />
       <LinearGradient
-        colors={["rgba(163, 230, 53, 0.8)", "rgba(6, 95, 70, 0.8)"]}
+        colors={["rgba(255, 255, 255, 0.9)", "rgba(255, 255, 255, 1)"]}
         style={StyleSheet.absoluteFillObject}
       />
 
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.headerText}>iGROW Dashboard</Text>
-          <Ionicons name="leaf" size={40} color="#FFFFFF" />
         </View>
-
         <Text style={styles.dashboardTitle}>Environment Overview</Text>
 
         <ScrollView contentContainerStyle={styles.scrollView}>
           {/* Environment Status Cards */}
-          <TouchableOpacity
-            onPress={() => {
-              handleCheckTemperature(); // Log soil moisture
-              navigation.navigate("Temperature"); // Navigate to SoilMoisture screen
-            }}
-          >
-            <LinearGradient
-              colors={["#FFE4B5", "#FFA07A"]}
-              style={styles.statusCard}
-            >
-              <MaterialCommunityIcons
-                name="temperature-celsius"
-                size={30}
-                color="#FF5722"
-              />
-              <Text style={styles.statusLabel}>Temperature</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-              handleLogHumidity(); // Log humidity
-              navigation.navigate("Humidity"); // Navigate to Humidity screen
-            }}
-          >
-            <LinearGradient
-              colors={["#E0F7FA", "#B2EBF2"]}
-              style={styles.statusCard}
-            >
-              <Ionicons name="water" size={30} color="#2196F3" />
-              <Text style={styles.statusLabel}>Humidity</Text>
-
-              {/* Display the actual humidity value here */}
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-              handleLogSoilMoisture(); // Log soil moisture
-              navigation.navigate("SoilMoisture"); // Navigate to SoilMoisture screen
-            }}
-          >
-            <LinearGradient
-              colors={["#E8F5E9", "#C8E6C9"]}
-              style={styles.statusCard}
-            >
-              <FontAwesome5 name="seedling" size={30} color="#4CAF50" />
-              <Text style={styles.statusLabel}>Soil Moisture</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-              handleLogLightIntensity(); // Log light intensity
-              navigation.navigate("LightIntensity"); // Navigate to LightIntensity screen
-            }}
-          >
-            <LinearGradient
-              colors={["#FFF9C4", "#FFF59D"]}
-              style={styles.statusCard}
-            >
-              <MaterialCommunityIcons
-                name="weather-sunny"
-                size={30}
-                color="#FFC107"
-              />
-              <Text style={styles.statusLabel}>Light Intensity</Text>
-
-              {/* Display intensity value */}
-            </LinearGradient>
-          </TouchableOpacity>
+          {Platform.OS === "web" ? (
+            <iframe src={webViewSource.uri} style={styles.webFrame} />
+          ) : (
+            <Webview
+              source={webViewSource}
+              style={styles.webView}
+              javaScriptEnabled={true}
+              scalesPageToFit={false}
+            />
+          )}
+          {Platform.OS === "web" ? (
+            <iframe src={webViewSource1.uri} style={styles.webFrame} />
+          ) : (
+            <Webview source={webViewSource1} style={styles.webView} />
+          )}
+          {Platform.OS === "web" ? (
+            <iframe src={webViewSource2.uri} style={styles.webFrame} />
+          ) : (
+            <Webview source={webViewSource2} style={styles.webView} />
+          )}
+          {Platform.OS === "web" ? (
+            <iframe src={webViewSource3.uri} style={styles.webFrame} />
+          ) : (
+            <Webview source={webViewSource3} style={styles.webView} />
+          )}
+          {Platform.OS === "web" ? (
+            <iframe
+              src={webViewSource4.uri}
+              style={styles.webFrameLightIntensity}
+            />
+          ) : (
+            <Webview source={webViewSource4} style={styles.webView} />
+          )}
         </ScrollView>
 
         {/* Water Control Button */}
@@ -286,21 +559,62 @@ function HomeScreen() {
           <TouchableOpacity
             style={[
               styles.controlButton,
-              waterOn && { backgroundColor: "#2196F3" }, // Blue background when water is on
+              waterOn && { backgroundColor: "#2196F3" },
+              isLoading && { opacity: 0.7 },
             ]}
-            onPress={handleWaterToggle} // Toggle water on/off when clicked
+            onPress={handleWaterToggle}
+            disabled={isLoading}
           >
-            <Ionicons
-              name={waterOn ? "water" : "water-outline"}
-              size={32}
-              color={waterOn ? "#FFFFFF" : "#2196F3"}
-            />
-            <Text style={styles.controlLabel}>
-              Water {waterOn ? "On" : "Off"} {/* Change text based on state */}
-            </Text>
+            {isLoading ? (
+              <ActivityIndicator color={waterOn ? "#FFFFFF" : "#2196F3"} />
+            ) : (
+              <>
+                <Ionicons
+                  name={waterOn ? "water" : "water-outline"}
+                  size={32}
+                  color={waterOn ? "#FFFFFF" : "#2196F3"}
+                />
+                <Text style={styles.controlLabel}>
+                  Water {waterOn ? "On" : "Off"}
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.controlButton,
+              pesticideOn && { backgroundColor: "#4CAF50" },
+              isLoading && { opacity: 0.7 },
+            ]}
+            onPress={handlePesticideToggle}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color={pesticideOn ? "#FFFFFF" : "#4CAF50"} />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name={pesticideOn ? "spray" : "spray-bottle"}
+                  size={32}
+                  color={pesticideOn ? "#FFFFFF" : "#4CAF50"}
+                />
+                <Text style={styles.controlLabel}>
+                  Pesticide {pesticideOn ? "On" : "Off"}
+                </Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
       </View>
+
+      <AlertModal
+        visible={modalVisible}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        onClose={() => setModalVisible(false)}
+      />
     </ImageBackground>
   );
 }
@@ -313,21 +627,22 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    justifyContent: "flex-start",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 5,
-    paddingBottom: 5,
+    paddingTop: 8,
+    paddingBottom: 12,
+    marginBottom: 8,
   },
   headerText: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#A4D79E",
     textShadowColor: "rgba(0, 0, 0, 0.2)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
@@ -335,8 +650,8 @@ const styles = StyleSheet.create({
   dashboardTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 10,
-    color: "#FFFFFF",
+    marginBottom: 20,
+    color: "#A4D79E",
     textAlign: "center",
     textShadowColor: "rgba(0, 0, 0, 0.2)",
     textShadowOffset: { width: 1, height: 1 },
@@ -345,7 +660,9 @@ const styles = StyleSheet.create({
   scrollView: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-around",
+    justifyContent: "space-between", // Changed to space-between
+    paddingHorizontal: 4,
+    gap: 12,
   },
   statusCard: {
     width: Dimensions.get("window").width * 0.45,
@@ -372,16 +689,39 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   controlContainer: {
-    justifyContent: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginVertical: 20,
+    paddingHorizontal: 4,
+    marginTop: 8,
+    marginBottom: 16,
   },
   controlButton: {
-    width: "40%",
-    height: 80,
-    borderRadius: 20,
+    width: "47%", // Match the width of dashboard items
+    height: 70, // Slightly smaller height
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.1)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    overflow: "hidden",
+  },
+  controlLabel: {
+    fontSize: 16,
+    color: "#4A5568",
+    marginTop: 6,
+    fontWeight: "500",
+  },
+  webView: {
+    flex: 1, // Fill the available space
+    width: "100%", // Full width of the container
+    height: "100%", // Full height of the container
+    borderRadius: 20, // Optional: rounded corners
     marginHorizontal: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -390,11 +730,35 @@ const styles = StyleSheet.create({
     elevation: 8,
     overflow: "hidden",
   },
-  controlLabel: {
-    fontSize: 18,
-    color: "#4A5568",
-    marginTop: 8,
-    fontWeight: "600",
+
+  webFrame: {
+    width: "17%", // Slightly smaller width
+    height: 220, // Reduced height
+    borderRadius: 16,
+    marginBottom: 16, // Add bottom margin
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.1)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  webFrameLightIntensity: {
+    width: "17%", // Slightly smaller full width
+    height: 220,
+    borderRadius: 16,
+    marginBottom: 16,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.1)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
 });
 

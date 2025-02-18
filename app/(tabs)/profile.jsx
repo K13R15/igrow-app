@@ -183,7 +183,7 @@ const Profile = () => {
     >
       <LeafPattern />
       <LinearGradient
-        colors={["rgba(163, 230, 53, 0.8)", "rgba(6, 95, 70, 0.8)"]}
+        colors={["rgba(255, 255, 255, 0.9)", "rgba(255, 255, 255, 1)"]}
         style={StyleSheet.absoluteFillObject}
       />
       <SafeAreaView style={styles.safeArea}>
@@ -222,7 +222,7 @@ const Profile = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Email</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.inputBlackText]}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -233,7 +233,7 @@ const Profile = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Password</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.inputBlackText]}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -242,7 +242,7 @@ const Profile = () => {
 
           <TouchableOpacity style={styles.updateButton} onPress={updateProfile}>
             <LinearGradient
-              colors={["#4CAF50", "#45A049"]}
+              colors={["#A4D79E", "#45A049"]}
               style={styles.updateGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#000000",
     textAlign: "center",
     marginBottom: 20,
     textShadowColor: "rgba(0, 0, 0, 0.2)",
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 16,
-    color: "#FFFFFF",
+    color: "#000000",
     marginBottom: 8,
     fontWeight: "600",
     textShadowColor: "rgba(0, 0, 0, 0.2)",
@@ -356,6 +356,9 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     color: "#333333",
+  },
+  inputBlackText: {
+    color: "#000000",
   },
   updateButton: {
     width: "100%",

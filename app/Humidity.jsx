@@ -8,10 +8,15 @@ import {
   Dimensions,
 } from "react-native";
 import { WebView } from "react-native-webview";
-import { DASHBOARD_URL1, DASHBOARD_URL2 } from "@env";
 
 const HumidityScreen = () => {
   const [humidity, setHumidity] = useState("Loading...");
+
+  const dashboardUrl1 =
+    "http://raspi.local:3000/d/fe192lni2vdhca/plant-sensors?orgId=1&refresh=5s&from=1734141181665&to=1734162781665&viewPanel=2&fullscreen&kiosk";
+
+  const dashboardUrl2 =
+    "http://raspi.local:3000/d/fe192lni2vdhca/plant-sensors?orgId=1&refresh=5s&from=1734270615114&to=1734292215114&viewPanel=8&fullscreen&kiosk";
 
   useEffect(() => {
     const fetchHumidity = async () => {
@@ -37,13 +42,13 @@ const HumidityScreen = () => {
 
       {Platform.OS === "web" ? (
         <iframe
-          src={DASHBOARD_URL1}
+          src={dashboardUrl1}
           style={{ width: width, height: height / 2 - 100, border: "none" }}
           title="Dashboard 1"
         />
       ) : (
         <WebView
-          source={{ uri: DASHBOARD_URL1 }}
+          source={{ uri: dashboardUrl1 }}
           style={[styles.webview, { width: width, height: height / 2 - 100 }]}
           scrollEnabled={false}
         />
@@ -51,13 +56,13 @@ const HumidityScreen = () => {
 
       {Platform.OS === "web" ? (
         <iframe
-          src={DASHBOARD_URL2}
+          src={dashboardUrl2}
           style={{ width: width, height: height / 2 - 100, border: "none" }}
           title="Dashboard 2"
         />
       ) : (
         <WebView
-          source={{ uri: DASHBOARD_URL2 }}
+          source={{ uri: dashboardUrl2 }}
           style={[styles.webview, { width: width, height: height / 2 - 100 }]}
           scrollEnabled={false}
         />

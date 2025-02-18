@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -17,7 +17,7 @@ import {
 import { BlurView } from "expo-blur";
 import { images } from "../../constants";
 import { CustomButton } from "../../components";
-import { getCurrentUser, signIn } from "../../lib/appwrite";
+import { getCurrentUser, signIn, listUsers } from "../../lib/appwrite";
 import { useGlobalContext } from "../../context/GlobalProvider";
 
 const { width, height } = Dimensions.get("window");
@@ -25,11 +25,26 @@ const { width, height } = Dimensions.get("window");
 const SignIn = () => {
   const { setUser, setIsLogged } = useGlobalContext();
   const [isSubmitting, setSubmitting] = useState(false);
+  const [hasExistingUser, setHasExistingUser] = useState(false);
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
   const [rememberPassword, setRememberPassword] = useState(false);
+
+  useEffect(() => {
+    const checkExistingUser = async () => {
+      try {
+        const users = await listUsers();
+        setHasExistingUser(users.total > 0);
+      } catch (error) {
+        console.error("Error checking existing users:", error);
+        setHasExistingUser(false); // Default to showing sign-up option if check fails
+      }
+    };
+
+    checkExistingUser();
+  }, []);
 
   const submit = async () => {
     if (form.email === "" || form.password === "") {
@@ -70,9 +85,10 @@ const SignIn = () => {
                 style={styles.logo}
               />
               <Text style={styles.message}>
-                Nurture your financial growth with iGROW </Text>
+                Nurture your financial growth with iGROW{" "}
+              </Text>
               <Text style={styles.message}>
-                 Sign in to explore your path to prosperity.
+                Sign in to explore your path to prosperity.
               </Text>
             </View>
 
@@ -111,10 +127,16 @@ const SignIn = () => {
                     trackColor={{ false: "#767577", true: "#059669" }}
                     thumbColor={rememberPassword ? "#f4f3f4" : "#f4f3f4"}
                   />
-                  <Text style={styles.rememberPasswordText}>Remember password</Text>
+                  <Text style={styles.rememberPasswordText}>
+                    Remember password
+                  </Text>
                 </View>
-                <TouchableOpacity onPress={() => router.push("/forgot-password")}>
-                  <Text style={styles.forgotPasswordLink}>Forgot password?</Text>
+                <TouchableOpacity
+                  onPress={() => router.push("/forgot-password")}
+                >
+                  <Text style={styles.forgotPasswordLink}>
+                    Forgot password?
+                  </Text>
                 </TouchableOpacity>
               </View>
 
@@ -126,12 +148,14 @@ const SignIn = () => {
                 isLoading={isSubmitting}
               />
 
-              <View style={styles.footer}>
-                <Text style={styles.footerText}>Don't have an account?</Text>
-                <TouchableOpacity onPress={() => router.push("/sign-up")}>
-                  <Text style={styles.signUpLink}>Sign Up</Text>
-                </TouchableOpacity>
-              </View>
+              {!hasExistingUser && (
+                <View style={styles.footer}>
+                  <Text style={styles.footerText}>Don't have an account?</Text>
+                  <TouchableOpacity onPress={() => router.push("/sign-up")}>
+                    <Text style={styles.signUpLink}>Sign Up</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </BlurView>
           </View>
         </ScrollView>
@@ -143,8 +167,8 @@ const SignIn = () => {
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   safeArea: {
     flex: 1,
@@ -161,7 +185,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 24,
-    backgroundColor: 'rgba(34, 197, 94, 0.2)', // Light green with opacity
+    backgroundColor: "rgba(34, 197, 94, 0.2)", // Light green with opacity
   },
   rightColumn: {
     flex: 1,
@@ -261,4 +285,3 @@ const styles = StyleSheet.create({
 });
 
 export default SignIn;
-

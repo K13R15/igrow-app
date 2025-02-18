@@ -5,7 +5,7 @@ import {
   Text,
   StyleSheet,
   Platform,
-  Dimensions,
+  Dimensions,      
 } from "react-native";
 import { WebView } from "react-native-webview";
 
@@ -18,18 +18,7 @@ const TemperatureScreen = () => {
   const dashboardUrl2 =
     "http://raspi.local:3000/d/fe192lni2vdhca/plant-sensors?orgId=1&refresh=5s&from=1734488606062&to=1734510206062&viewPanel=5&fullscreen&kiosk";
 
-  useEffect(() => {
-    const fetchTemperature = async () => {
-      // Simulate data fetching
-      setTemperature("25.6°C");
-    };
-
-    fetchTemperature();
-
-    const interval = setInterval(fetchTemperature, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
+  
   const { width, height } = Dimensions.get("window");
 
   return (
